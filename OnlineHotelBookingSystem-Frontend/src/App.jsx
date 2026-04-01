@@ -1,10 +1,11 @@
+import { AuthProvider } from "./context/AuthContext";
 import MainRoute from "./routes/MainRoute";
 
 function App() {
   return (
-    <div>
+    <AuthProvider>
       <MainRoute />
-    </div>
+    </AuthProvider>
   );
 }
 

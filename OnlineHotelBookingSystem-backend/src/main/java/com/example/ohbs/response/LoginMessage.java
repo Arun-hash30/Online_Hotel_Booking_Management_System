@@ -5,48 +5,64 @@ public class LoginMessage {
     private boolean success;
     private String role;
     private Long userId;
+    private String token;
 
-    // Constructors, getters, and setters
+    // Constructor without token (for backward compatibility)
+    public LoginMessage(String message, boolean success, String role, Long userId) {
+        this.message = message;
+        this.success = success;
+        this.role = role;
+        this.userId = userId;
+    }
     
-
-    public String getMessage() {
-        return message;
+    // Constructor with token (used in your service)
+    public LoginMessage(String message, boolean success, String role, Long userId, String token) {
+        this.message = message;
+        this.success = success;
+        this.role = role;
+        this.userId = userId;
+        this.token = token;
     }
 
-    public LoginMessage(String message, boolean success, String role, Long userId) {
-		super();
-		this.message = message;
-		this.success = success;
-		this.role = role;
-		this.userId = userId;
-	}
-
-	public void setMessage(String message) {
-        this.message = message;
+    // Getters
+    public String getMessage() {
+        return message;
     }
 
     public boolean isSuccess() {
         return success;
     }
 
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
     public String getRole() {
         return role;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+    
+    public String getToken() {
+        return token;
+    }
+
+    // Setters
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
     }
 
     public void setRole(String role) {
         this.role = role;
     }
 
-	public Long getUserId() {
-		return userId;
-	}
-
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
     
+    public void setToken(String token) {
+        this.token = token;
+    }
 }

@@ -6,17 +6,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
 
-	// Additional query methods can be defined here if needed
-		  List<Room> findByPricePerNightLessThanEqual(double price);
-		  @Query("SELECT r FROM Room r WHERE r.hotel.starRating = :starRating")
-		    List<Room> findByHotelStarRating(@Param("starRating") int starRating);
+    // Simple price filter
+    List<Room> findByPricePerNightLessThanEqual(double price);
 
-		    @Query("SELECT r FROM Room r WHERE LOWER(r.hotel.address) LIKE %:letters%")
-		    List<Room> findByHotelAddressContainingLetters(@Param("letters") String letters);
+    // Find rooms by single hotel ID
+    @Query("SELECT r FROM Room r WHERE r.hotelId = :hotelId")
+    List<Room> findByHotelId(@Param("hotelId") Long hotelId);
+    
+    // ADD THIS: Find rooms by multiple hotel IDs
+    @Query("SELECT r FROM Room r WHERE r.hotelId IN :hotelIds")
+    List<Room> findByHotelIdIn(@Param("hotelIds") List<Long> hotelIds);
+    
+    // Optional: Find rooms by hotel ID with pagination
+    // List<Room> findByHotelId(Long hotelId, Pageable pageable);
 }

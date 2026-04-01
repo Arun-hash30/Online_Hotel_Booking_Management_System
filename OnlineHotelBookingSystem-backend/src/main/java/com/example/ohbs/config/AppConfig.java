@@ -1,5 +1,7 @@
 package com.example.ohbs.config;
 
+import com.example.ohbs.filter.JwtAuthFilter;
+import com.example.ohbs.service.UseruserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,69 +13,94 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.example.ohbs.filter.JwtAuthFilter;
-import com.example.ohbs.service.UseruserDetailsService;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class AppConfig {
-	@Autowired
-	private JwtAuthFilter authFilter;
 
-	// Authentication
-	@Bean
-	public UserDetailsService userDetServ() {
-		/*
-		 * UserDetails admin=User.withUsername("abhi") .password(pw.encode("pwd1"))
-		 * .roles("ADMIN") .build(); UserDetails user1=User.withUsername("sheela")
-		 * .password(pw.encode("pwd2")) .roles("USER") .build(); UserDetails
-		 * user2=User.withUsername("purush") .password(pw.encode("pwd3")) .roles("USER")
-		 * .build();
-		 */
+    @Autowired
+    private JwtAuthFilter authFilter;
 
-		return new UseruserDetailsService();
-	}
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new UseruserDetailsService();
+    }
 
-	@Bean // Encrypiting the passwords
-	public PasswordEncoder endode() {
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                // Public user endpoints
+                .requestMatchers("/users/login", "/users/create", "/users/register", "/users/getAll").permitAll()
 
-	@Bean
-	public AuthenticationProvider provider() {
-		DaoAuthenticationProvider dao = new DaoAuthenticationProvider();
-		dao.setUserDetailsService(userDetServ());
-		dao.setPasswordEncoder(endode());
-		return dao;
-	}
+                // Public hotel and room endpoints
+                .requestMatchers("/hotels/**").permitAll()
+                .requestMatchers("/rooms/**").permitAll()
 
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-		return config.getAuthenticationManager();
-	}
+                // Public booking endpoints
+                .requestMatchers("/bookings/getAll", "/bookings/check-availability").permitAll()
 
-	@Bean // Authorization
-	public SecurityFilterChain filter(HttpSecurity http) throws Exception {
-		return http.csrf().disable().authorizeHttpRequests()
-				.requestMatchers("/users/create","/users/getAll","/users/{id}", "/hotels/create", "/hotels/getAll","/rooms/create","/rooms/getAll","/rooms/{id}", "/hotels/{id}","/rooms/price/{price}",
-						"/rooms/rating/{starRating}", "/rooms/hotel-address/{letters}", "/bookings/create", "/bookings/getAll",
-						"/users/login")
-				.permitAll().and().authorizeHttpRequests()
-				.requestMatchers(  
-						 "/rooms/price/{price}", "/rooms/available", "/bookings/{id}")
-				.authenticated().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-				.authenticationProvider(provider())
-				.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class).build();
+                // Authenticated user booking endpoints
+                .requestMatchers("/bookings/create").authenticated()
+                .requestMatchers("/bookings/request-cancellation").authenticated()
+                .requestMatchers("/bookings/user/**").authenticated()
 
-	}
+                // Admin / Hotel Manager only endpoints
+                .requestMatchers("/bookings/pending-cancellations").hasAnyRole("HOTELMANAGER", "ADMIN")
+                .requestMatchers("/bookings/approve-cancellation/**").hasAnyRole("HOTELMANAGER", "ADMIN")
+                .requestMatchers("/bookings/reject-cancellation/**").hasAnyRole("HOTELMANAGER", "ADMIN")
+
+                // All other requests require authentication
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(authenticationProvider())
+            .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService());
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return authenticationProvider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
 }

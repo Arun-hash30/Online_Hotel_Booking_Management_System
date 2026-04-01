@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 import Image from "../../assets/login.jpg";
 
 const Login = () => {
@@ -8,23 +9,22 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const validate = () => {
-    const errors = {};
+    const newErrors = {};
     if (!formData.email.trim()) {
-      errors.email = "Email is required";
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = "Email is invalid";
+      newErrors.email = "Email is invalid";
     }
-
     if (!formData.password.trim()) {
-      errors.password = "Password is required";
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      errors.password = "Password must be at least 6 characters";
+      newErrors.password = "Password must be at least 6 characters";
     }
-
-    setErrors(errors);
-    return Object.keys(errors).length === 0;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
@@ -32,60 +32,44 @@ const Login = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const login = async (email, password) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    setLoading(true);
     try {
       const response = await axios.post(
         "http://localhost:8080/users/login",
-        { email, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          }
-        }
+        { email: formData.email, password: formData.password },
+        { headers: { "Content-Type": "application/json" } }
       );
-      console.log('Login response data:', response.data); // Debugging line
-      return response.data; // { success: true/false, role: string, userId: string }
+
+      const { success, role, userId, token } = response.data;
+
+      if (!success) {
+        setErrors({ form: "Invalid credentials. Please try again." });
+      } else {
+        login(userId, role, token); // updates context → triggers MainRoute re-render → navigates
+        switch (role) {
+          case "ADMIN":
+            navigate("/bookings/all");
+            break;
+          case "HOTELMANAGER":
+            navigate("/manager/dashboard");
+            break;
+          case "CUSTOMER":
+            navigate("/");
+            break;
+          default:
+            setErrors({ form: "Role not recognized." });
+        }
+      }
     } catch (error) {
       console.error("Login error:", error);
-      return { success: false, role: null, userId: null };
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) {
-      return;
-    }
-
-    setLoading(true);
-    const { email, password } = formData;
-    const result = await login(email, password);
-
-    console.log('Login result:', result); // Debugging line
-
-    const { success, role, userId } = result;
-
-    if (!success) {
       setErrors({ form: "Invalid credentials. Please try again." });
-    } else {
-      console.log("Logged in userId:", userId); // Log userId to console
-      localStorage.setItem('userId', userId); // Store user ID
-      localStorage.setItem('userRole', role); // Store user role
-      switch (role) {
-        case "ADMIN":
-          navigate("/bookings/all");
-          break;
-        case "HOTELMANAGER":
-          navigate("/bookings/all");
-          break;
-        case "CUSTOMER":
-          navigate("/");
-          break;
-        default:
-          setErrors({ form: "Role not recognized." });
-      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -129,18 +113,16 @@ const Login = () => {
               />
               {errors.password && <p className="text-red-500 text-sm mt-2">{errors.password}</p>}
             </div>
-            <div className="flex items-center justify-between">
-              <button
-                className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                type="submit"
-                disabled={loading}
-              >
-                {loading ? 'Signing In...' : 'Sign In'}
-              </button>
-            </div>
+            <button
+              className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:opacity-50"
+              type="submit"
+              disabled={loading}
+            >
+              {loading ? "Signing In..." : "Sign In"}
+            </button>
             {errors.form && <p className="text-red-500 text-sm mt-2">{errors.form}</p>}
             <div className="text-center mt-4">
-              <span className="text-gray-700 text-sm">Do not have an account? {" "}</span>
+              <span className="text-gray-700 text-sm">Do not have an account? </span>
               <Link to="/signup" className="text-blue-500 hover:underline text-sm">
                 Register Here
               </Link>

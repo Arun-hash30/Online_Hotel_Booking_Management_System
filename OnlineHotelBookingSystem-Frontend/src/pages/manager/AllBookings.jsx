@@ -1,103 +1,118 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { format } from "date-fns";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useAuth } from "../../context/AuthContext";
 
-function AllBookings() {
+const AllBookings = () => {
   const [bookings, setBookings] = useState([]);
-  const [page, setPage] = useState(0); // Current page
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const response = await axios.get('http://localhost:8080/bookings/getAll');
-        setBookings(response.data);
-      } catch (error) {
-        console.error('Error fetching bookings:', error);
-        // Optionally handle error state or show a message to the user
-      }
-    };
+    fetchAllBookings();
+  }, []);
 
-    fetchBookings();
-  }, []); // Empty dependency array ensures useEffect runs only once on component mount
+  const fetchAllBookings = async () => {
+    const token = user?.token || localStorage.getItem("token");
+    try {
+      const [bookingsRes, roomsRes, hotelsRes] = await Promise.all([
+        axios.get("http://localhost:8080/bookings/getAll", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get("http://localhost:8080/rooms/getAll"),
+        axios.get("http://localhost:8080/hotels/getAll"),
+      ]);
 
-  // Pagination logic
-  const handleChangePage = (newPage) => {
-    setPage(newPage);
+      const enrichedBookings = bookingsRes.data.map((booking) => {
+        const room = roomsRes.data.find((r) => r.id === booking.roomId);
+        const hotel = hotelsRes.data.find((h) => h.id === room?.hotelId);
+        return { ...booking, roomDetails: room, hotelDetails: hotel };
+      });
+
+      setBookings(enrichedBookings);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      toast.error("Failed to fetch bookings");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset to the first page when rows per page changes
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "PENDING_CANCELLATION":
+        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending Approval</span>;
+      case "CANCELLED":
+        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Cancelled</span>;
+      case "CONFIRMED":
+        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Confirmed</span>;
+      default:
+        return <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">{status}</span>;
+    }
   };
 
-  const paginatedBookings = bookings.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">All Bookings</h1>
+    <div>
+      <ToastContainer />
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">All Bookings</h2>
+        <p className="text-gray-600">View all hotel bookings</p>
+      </div>
+
       {bookings.length === 0 ? (
-        <div className="text-center text-gray-600 mt-8">No bookings available.</div>
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <p className="text-gray-500">No bookings found.</p>
+        </div>
       ) : (
-        <>
+        <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border rounded-lg overflow-hidden shadow-lg">
-              <thead className="bg-gray-200">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-In Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-Out Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hotel</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-In</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Check-Out</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {paginatedBookings.map((booking) => (
-                  <tr key={booking.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">{booking.userId}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{booking.roomId}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{booking.checkInDate}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{booking.checkOutDate}</td>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {bookings.map((booking) => (
+                  <tr key={booking.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{booking.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.userId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.roomId}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.hotelDetails?.name || "N/A"}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {format(new Date(booking.checkInDate), "MMM dd, yyyy")}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {format(new Date(booking.checkOutDate), "MMM dd, yyyy")}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">₹{booking.totalPrice}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(booking.status)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-
-          {/* Pagination controls */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center">
-              <button
-                onClick={() => handleChangePage(page - 1)}
-                disabled={page === 0}
-                className="px-4 py-2 bg-gray-200 text-gray-600 rounded-l-md hover:bg-gray-300 disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="px-4 py-2 bg-gray-200 text-gray-600">
-                Page {page + 1} of {Math.ceil(bookings.length / rowsPerPage)}
-              </span>
-              <button
-                onClick={() => handleChangePage(page + 1)}
-                disabled={page >= Math.ceil(bookings.length / rowsPerPage) - 1}
-                className="px-4 py-2 bg-gray-200 text-gray-600 rounded-r-md hover:bg-gray-300 disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-            <select
-              value={rowsPerPage}
-              onChange={handleChangeRowsPerPage}
-              className="border border-gray-300 px-4 py-2 rounded-md"
-            >
-              <option value={5}>5 rows</option>
-              <option value={10}>10 rows</option>
-              <option value={25}>25 rows</option>
-              <option value={50}>50 rows</option>
-            </select>
-          </div>
-        </>
+        </div>
       )}
     </div>
   );
-}
+};
 
 export default AllBookings;

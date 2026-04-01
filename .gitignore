@@ -1,0 +1,58 @@
+# Compiled class files
+*.class
+*.jar
+*.war
+*.ear
+target/
+build/
+
+# IDE files
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.classpath
+.project
+.settings/
+.mvn/
+
+# Log files
+*.log
+logs/
+
+# Application specific
+uploads/
+*.db
+*.sqlite
+
+# Environment files
+application.properties
+application-postgres.properties
+application-mysql.properties
+*.env
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node modules (if you have React frontend)
+node_modules/
+dist/
+build/
+
+# Package files
+*.zip
+*.tar.gz
+
+# Spring Boot
+spring-boot-devtools.properties
+
+# Maven wrapper (optional - you can keep if you want)
+# !/mvnw
+# !/mvnw.cmd

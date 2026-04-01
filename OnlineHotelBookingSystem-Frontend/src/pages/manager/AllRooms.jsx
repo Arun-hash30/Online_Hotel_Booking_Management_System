@@ -4,7 +4,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import EditRoom from './EditRoom';
 import AddRoom from './AddRoom';
-import { PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
+import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 function AllRooms() {
   const [rooms, setRooms] = useState([]);
@@ -12,10 +12,8 @@ function AllRooms() {
   const [editingRoom, setEditingRoom] = useState(null);
   const [isAddRoomOpen, setIsAddRoomOpen] = useState(false);
   const [error, setError] = useState(null);
-
-  // Pagination state
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
+  const rowsPerPage = 5;
 
   useEffect(() => {
     fetchRooms();
@@ -24,227 +22,182 @@ function AllRooms() {
 
   const fetchRooms = () => {
     axios.get('http://localhost:8080/rooms/getAll')
-      .then(response => setRooms(response.data))
-      .catch(error => {
-        console.error('Error fetching rooms:', error);
-        setError('Failed to fetch rooms');
-      });
+      .then(res => setRooms(res.data))
+      .catch(() => setError('Failed to fetch rooms'));
   };
 
   const fetchHotels = () => {
     axios.get('http://localhost:8080/hotels/getAll')
-      .then(response => setHotels(response.data))
-      .catch(error => {
-        console.error('Error fetching hotels:', error);
-        setError('Failed to fetch hotels');
-      });
-  };
-
-  const handleAddRoom = () => {
-    setIsAddRoomOpen(true);
-  };
-
-  const handleEditRoom = (room) => {
-    setEditingRoom(room);
+      .then(res => setHotels(res.data))
+      .catch(() => setError('Failed to fetch hotels'));
   };
 
   const handleDeleteRoom = (roomId) => {
+    if (!window.confirm('Delete this room?')) return;
     axios.delete(`http://localhost:8080/rooms/${roomId}`)
-      .then(response => {
-        if (response.status === 204) {
-          toast.success('Room deleted successfully');
-          setRooms(rooms.filter(room => room.id !== roomId));
-        } else {
-          throw new Error('Failed to delete room');
+      .then(res => {
+        if (res.status === 204) {
+          toast.success('Room deleted');
+          setRooms(rooms.filter(r => r.id !== roomId));
         }
       })
-      .catch(error => {
-        console.error('Error deleting room:', error);
-        setError('Failed to delete room: ' + error.message);
-        toast.error('Failed to delete room: ' + error.message);
+      .catch(() => {
+        toast.error('Delete failed');
         fetchRooms();
       });
   };
 
-  const handleCloseAddRoom = () => {
-    setIsAddRoomOpen(false);
-  };
-
-  const handleSaveRoom = (newRoomData) => {
-    axios.post('http://localhost:8080/rooms/create', newRoomData)
-      .then(response => {
-        setRooms([...rooms, response.data]);
-        setIsAddRoomOpen(false);
-        toast.success('Room added successfully');
-      })
-      .catch(error => {
-        console.error('Error adding room:', error);
-        setError('Failed to add room');
-        toast.error('Failed to add room: ' + error.message);
-      });
-  };
-
-  const handleUpdateRoom = (updatedRoomData) => {
-    axios.put(`http://localhost:8080/rooms/${updatedRoomData.id}`, updatedRoomData)
-      .then(response => {
-        setRooms(rooms.map(room => (room.id === updatedRoomData.id ? response.data : room)));
-        setEditingRoom(null);
+  const handleSaveRoom = (updatedRoom) => {
+    axios.put(`http://localhost:8080/rooms/${updatedRoom.id}`, updatedRoom)
+      .then(res => {
         toast.success('Room updated successfully');
+        setRooms(rooms.map(r => r.id === res.data.id ? res.data : r));
+        setEditingRoom(null);
+        fetchRooms(); // refresh to get updated images
       })
-      .catch(error => {
-        console.error('Error updating room:', error);
-        setError('Failed to update room');
-        toast.error('Failed to update room: ' + error.message);
-      });
+      .catch(() => toast.error('Update failed'));
+  };
+
+  const handleAddRoom = (newRoom) => {
+    axios.post('http://localhost:8080/rooms/create', newRoom)
+      .then(res => {
+        toast.success('Room added successfully');
+        setRooms([...rooms, res.data]);
+        setIsAddRoomOpen(false);
+        fetchRooms();
+      })
+      .catch(() => toast.error('Failed to add room'));
   };
 
   const mergedRooms = rooms.map(room => {
-    const hotel = hotels.find(h => h.id === room.hotelId);
+    const hotel = hotels.find(h => Number(h.id) === Number(room.hotelId));
     return { ...room, hotelName: hotel ? hotel.name : 'Unknown' };
   });
 
-  // Pagination logic
-  const handleChangePage = (newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset to the first page
-  };
-
   const paginatedRooms = mergedRooms.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const totalPages = Math.ceil(mergedRooms.length / rowsPerPage);
 
   return (
     <div className="container mx-auto px-4 py-6">
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl pauseOnFocusLoss draggable pauseOnHover />
+      <ToastContainer />
       <h1 className="text-3xl font-bold mb-6 text-center">All Rooms</h1>
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 mb-4 rounded">{error}</div>}
+
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
       <div className="flex justify-end mb-4">
         <button
-          onClick={handleAddRoom}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => setIsAddRoomOpen(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          Add Room
+          + Add Room
         </button>
       </div>
-      {mergedRooms.length === 0 ? (
-        <div className="text-center text-gray-600 mt-8">No rooms available.</div>
-      ) : (
-        <>
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border rounded-lg overflow-hidden shadow-lg">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hotel Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available Rooms</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price Per Night</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white shadow rounded">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="px-4 py-2 text-left">Room ID</th>
+              <th className="px-4 py-2 text-left">Hotel</th>
+              <th className="px-4 py-2 text-left">Type</th>
+              <th className="px-4 py-2 text-left">Available</th>
+              <th className="px-4 py-2 text-left">Price/Night</th>
+              <th className="px-4 py-2 text-left">Images</th>
+              <th className="px-4 py-2 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedRooms.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="text-center py-8 text-gray-500">No rooms found</td>
+              </tr>
+            ) : (
+              paginatedRooms.map(room => (
+                <tr key={room.id} className="border-t hover:bg-gray-50">
+                  <td className="px-4 py-2">{room.id}</td>
+                  <td className="px-4 py-2">{room.hotelName}</td>
+                  <td className="px-4 py-2">{room.type}</td>
+                  <td className="px-4 py-2">{room.numberAvailable}</td>
+                  <td className="px-4 py-2">₹{room.pricePerNight}</td>
+                  <td className="px-4 py-2">
+                    {room.images && room.images.length > 0 ? (
+                      <div className="flex space-x-1">
+                        {room.images.slice(0, 2).map((img, idx) => (
+                          <img
+                            key={idx}
+                            src={img}
+                            alt=""
+                            className="w-10 h-10 object-cover rounded"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        ))}
+                        {room.images.length > 2 && (
+                          <span className="text-xs text-gray-500 self-center">+{room.images.length - 2}</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400 text-sm">No images</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2 flex space-x-2">
+                    <button
+                      onClick={() => setEditingRoom(room)}
+                      className="text-blue-500 hover:text-blue-700"
+                      title="Edit"
+                    >
+                      <PencilSquareIcon className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteRoom(room.id)}
+                      className="text-red-500 hover:text-red-700"
+                      title="Delete"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {paginatedRooms.map(room => (
-                  <tr key={room.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">{room.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{room.hotelName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{room.numberAvailable}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{room.pricePerNight}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{room.type}</td>
-                    <td className="px-6 py-4 whitespace-nowrap flex space-x-2">
-                      <button
-                        onClick={() => handleEditRoom(room)}
-                        className="text-blue-500 hover:text-blue-700"
-                        aria-label="Edit"
-                      >
-                        <PencilAltIcon className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteRoom(room.id)}
-                        className="text-red-500 hover:text-red-700"
-                        aria-label="Delete"
-                      >
-                        <TrashIcon className="w-5 h-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {/* Pagination controls */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center">
-              <button
-                onClick={() => handleChangePage(page - 1)}
-                disabled={page === 0}
-                className="px-4 py-2 bg-gray-200 text-gray-600 rounded-l-md hover:bg-gray-300 disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span className="px-4 py-2 bg-gray-200 text-gray-600">
-                Page {page + 1} of {Math.ceil(mergedRooms.length / rowsPerPage)}
-              </span>
-              <button
-                onClick={() => handleChangePage(page + 1)}
-                disabled={page >= Math.ceil(mergedRooms.length / rowsPerPage) - 1}
-                className="px-4 py-2 bg-gray-200 text-gray-600 rounded-r-md hover:bg-gray-300 disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-            <select
-              value={rowsPerPage}
-              onChange={handleChangeRowsPerPage}
-              className="border border-gray-300 px-4 py-2 rounded-md"
-            >
-              <option value={5}>5 rows</option>
-              <option value={10}>10 rows</option>
-              <option value={25}>25 rows</option>
-              <option value={50}>50 rows</option>
-            </select>
-          </div>
-        </>
-      )}
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
-      {/* Edit Room Dialog */}
+      {/* Pagination */}
+      <div className="flex justify-between items-center mt-4">
+        <button
+          onClick={() => setPage(p => p - 1)}
+          disabled={page === 0}
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Prev
+        </button>
+        <span>Page {page + 1} of {totalPages || 1}</span>
+        <button
+          onClick={() => setPage(p => p + 1)}
+          disabled={page >= totalPages - 1}
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+
+      {/* Edit Modal */}
       {editingRoom && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen"></span>&#8203;
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <EditRoom
-                room={editingRoom}
-                hotels={hotels}
-                onSave={handleUpdateRoom}
-                onClose={() => setEditingRoom(null)}
-              />
-            </div>
-          </div>
-        </div>
+        <EditRoom
+          room={editingRoom}
+          hotels={hotels}
+          onSave={handleSaveRoom}
+          onClose={() => setEditingRoom(null)}
+        />
       )}
 
-      {/* Add Room Dialog */}
+      {/* Add Modal */}
       {isAddRoomOpen && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen"></span>&#8203;
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <AddRoom
-                hotels={hotels}
-                onSave={handleSaveRoom}
-                onClose={() => setIsAddRoomOpen(false)}
-              />
-            </div>
-          </div>
-        </div>
+        <AddRoom
+          hotels={hotels}
+          onSave={handleAddRoom}
+          onClose={() => setIsAddRoomOpen(false)}
+        />
       )}
     </div>
   );

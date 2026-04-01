@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .header p {
+            margin: 10px 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .booking-details {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .detail-value {
+            color: #333;
+        }
+        .total-amount {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .total-amount h3 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .info-box {
+            background: #e8f4fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .info-box h4 {
+            margin: 0 0 10px;
+            color: #667eea;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            border-top: 1px solid #e0e0e0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .status-confirmed {
+            background: #10b981;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 14px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+            }
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏨 {HOTEL_NAME}</h1>
+            <p>Booking Confirmation</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear <strong>{GUEST_NAME}</strong>,</p>
+            
+            <p>Thank you for choosing <strong>{HOTEL_NAME}</strong>. We are delighted to confirm your booking with us.</p>
+            
+            <div class="booking-details">
+                <h3 style="margin-top: 0;">Booking Details</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Booking ID:</span>
+                    <span class="detail-value">#{BOOKING_ID}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value"><span class="status-confirmed">CONFIRMED</span></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Room Type:</span>
+                    <span class="detail-value">{ROOM_TYPE}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Check-in Date:</span>
+                    <span class="detail-value">{CHECK_IN_DATE}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Check-out Date:</span>
+                    <span class="detail-value">{CHECK_OUT_DATE}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Number of Nights:</span>
+                    <span class="detail-value">{NUMBER_OF_NIGHTS} night(s)</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Price per Night:</span>
+                    <span class="detail-value">₹{PRICE_PER_NIGHT}</span>
+                </div>
+            </div>
+            
+            <div class="total-amount">
+                <h3>Total Amount: ₹{TOTAL_PRICE}</h3>
+                <p style="margin: 5px 0 0;">Inclusive of all taxes</p>
+            </div>
+            
+            <div class="info-box">
+                <h4>📋 Important Information</h4>
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li>Check-in time: 2:00 PM | Check-out time: 11:00 AM</li>
+                    <li>Please carry a valid government-issued ID proof</li>
+                    <li>Early check-in and late check-out subject to availability</li>
+                    <li>Free cancellation up to 24 hours before check-in</li>
+                    <li>Complimentary Wi-Fi available throughout the property</li>
+                    <li>Breakfast included in your stay</li>
+                </ul>
+            </div>
+            
+            <div class="info-box">
+                <h4>📍 Location & Contact</h4>
+                <p><strong>{HOTEL_NAME}</strong><br>
+                {HOTEL_ADDRESS}<br>
+                📞 Phone: +91-XXXXXXXXXX<br>
+                📧 Email: support@ohbs.com</p>
+            </div>
+            
+            <center>
+                <a href="#" class="button">View My Booking</a>
+            </center>
+            
+            <p style="margin-top: 30px;">We look forward to welcoming you and making your stay memorable!</p>
+            
+            <p>Warm regards,<br>
+            <strong>The {HOTEL_NAME} Team</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated confirmation email. Please do not reply to this message.</p>
+            <p>© 2024 OHBS - Online Hotel Booking System. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -16,7 +16,7 @@ function AdminRouter() {
     setSidebarOpen(!sidebarOpen);
   };
 
-  return (
+  return ( 
     <MainLayout sidebarOpen={sidebarOpen} toggleSidebar={toggleSidebar}>
       <Routes>
         <Route path="/bookings/all" element={<AllBookings />} />
