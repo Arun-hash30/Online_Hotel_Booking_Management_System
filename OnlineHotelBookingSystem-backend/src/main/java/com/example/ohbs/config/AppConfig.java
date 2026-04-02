@@ -66,16 +66,16 @@ public class AppConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Allow all Vercel frontend URLs
+
         List<String> allowedOrigins = Arrays.asList(
             "http://localhost:5173",
             "http://localhost:3000",
             "https://hotelbooking-theta-sooty.vercel.app",
             "https://hotelbooking-ffh44w56b-aruns-projects-bdb09ea5.vercel.app",
-            "https://hotel-booking-frontend-topaz.vercel.app"
+            "https://hotel-booking-frontend-topaz.vercel.app",
+            "https://hotelbookings-rbkzvxqs5-aruns-projects-bdb09ea5.vercel.app"
         );
-        
+
         configuration.setAllowedOrigins(allowedOrigins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
