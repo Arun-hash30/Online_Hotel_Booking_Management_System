@@ -3,7 +3,6 @@ package com.example.ohbs.config;
 import com.example.ohbs.filter.JwtAuthFilter;
 import com.example.ohbs.service.UseruserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,6 +23,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -32,9 +32,6 @@ public class AppConfig {
 
     @Autowired
     private JwtAuthFilter authFilter;
-    
-    @Value("${app.cors.allowed-origins:http://localhost:5173}")
-    private String allowedOrigins;
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -47,27 +44,16 @@ public class AppConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // Public user endpoints
                 .requestMatchers("/users/login", "/users/create", "/users/register", "/users/getAll").permitAll()
-
-                // Public hotel and room endpoints
                 .requestMatchers("/hotels/**").permitAll()
                 .requestMatchers("/rooms/**").permitAll()
-
-                // Public booking endpoints
                 .requestMatchers("/bookings/getAll", "/bookings/check-availability").permitAll()
-
-                // Authenticated user booking endpoints
                 .requestMatchers("/bookings/create").authenticated()
                 .requestMatchers("/bookings/request-cancellation").authenticated()
                 .requestMatchers("/bookings/user/**").authenticated()
-
-                // Admin / Hotel Manager only endpoints
                 .requestMatchers("/bookings/pending-cancellations").hasAnyRole("HOTELMANAGER", "ADMIN")
                 .requestMatchers("/bookings/approve-cancellation/**").hasAnyRole("HOTELMANAGER", "ADMIN")
                 .requestMatchers("/bookings/reject-cancellation/**").hasAnyRole("HOTELMANAGER", "ADMIN")
-
-                // All other requests require authentication
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -81,12 +67,21 @@ public class AppConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Split comma-separated origins
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Allow all Vercel frontend URLs
+        List<String> allowedOrigins = Arrays.asList(
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "https://hotelbooking-theta-sooty.vercel.app",
+            "https://hotelbooking-ffh44w56b-aruns-projects-bdb09ea5.vercel.app",
+            "https://hotel-booking-frontend-topaz.vercel.app"
+        );
+        
+        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
