@@ -3,6 +3,7 @@ package com.example.ohbs.config;
 import com.example.ohbs.filter.JwtAuthFilter;
 import com.example.ohbs.service.UseruserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +32,9 @@ public class AppConfig {
 
     @Autowired
     private JwtAuthFilter authFilter;
+    
+    @Value("${app.cors.allowed-origins:http://localhost:5173,https://your-frontend.vercel.app}")
+    private String allowedOrigins;
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -76,10 +80,13 @@ public class AppConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        
+        // Split comma-separated origins
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
