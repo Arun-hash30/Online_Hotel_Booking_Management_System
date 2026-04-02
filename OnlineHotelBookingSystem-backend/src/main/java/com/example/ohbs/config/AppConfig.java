@@ -33,7 +33,7 @@ public class AppConfig {
     @Autowired
     private JwtAuthFilter authFilter;
     
-    @Value("${app.cors.allowed-origins:http://localhost:5173,https://your-frontend.vercel.app}")
+    @Value("${app.cors.allowed-origins:http://localhost:5173}")
     private String allowedOrigins;
 
     @Bean

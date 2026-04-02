@@ -45,3 +45,29 @@ yarn.lock
 # Backend
 *.log
 *.tmp
+
+
+# Environment files
+application-render.properties
+application-postgres.properties
+*.env
+
+# Frontend
+node_modules/
+dist/
+build/
+.next/
+
+# Backend
+target/
+.mvn/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
