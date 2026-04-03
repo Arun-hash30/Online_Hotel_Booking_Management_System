@@ -68,12 +68,13 @@ public class AppConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // ✅ Using allowedOriginPatterns so wildcards work with credentials
-        configuration.setAllowedOriginPatterns(Arrays.asList(
-            "http://localhost:5173",
-            "http://localhost:3000",
-            "https://*-aruns-projects-bdb09ea5.vercel.app",  // covers ALL your Vercel preview URLs
-            "https://hotelbooking-theta-sooty.vercel.app"    // your custom/stable Vercel URL
-        ));
+       configuration.setAllowedOriginPatterns(Arrays.asList(
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://*-aruns-projects-bdb09ea5.vercel.app",
+    "https://hotelbooking-theta-sooty.vercel.app",
+    "https://hotelbookings-ten.vercel.app"           // ✅ ADD THIS
+));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
