@@ -48,8 +48,6 @@ yarn.lock
 
 
 # Environment files
-application-render.properties
-application-postgres.properties
 *.env
 
 # Frontend
