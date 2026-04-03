@@ -5,6 +5,7 @@ import com.example.ohbs.service.UseruserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -23,7 +24,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -44,6 +44,7 @@ public class AppConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/users/login", "/users/create", "/users/register", "/users/getAll").permitAll()
                 .requestMatchers("/hotels/**").permitAll()
                 .requestMatchers("/rooms/**").permitAll()
@@ -67,14 +68,13 @@ public class AppConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ✅ Using allowedOriginPatterns so wildcards work with credentials
-       configuration.setAllowedOriginPatterns(Arrays.asList(
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://*-aruns-projects-bdb09ea5.vercel.app",
-    "https://hotelbooking-theta-sooty.vercel.app",
-    "https://hotelbookings-ten.vercel.app"           // ✅ ADD THIS
-));
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "https://*-aruns-projects-bdb09ea5.vercel.app",
+            "https://hotelbooking-theta-sooty.vercel.app",
+            "https://hotelbookings-ten.vercel.app"
+        ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
