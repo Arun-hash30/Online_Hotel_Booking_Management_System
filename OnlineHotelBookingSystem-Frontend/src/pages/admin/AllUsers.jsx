@@ -14,13 +14,13 @@ function AllUsers() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
-    axios.get('http://localhost:8080/users/getAll')
+    axios.get('https://online-hotel-booking-system-bf2k.onrender.com/users/getAll')
       .then(res => { setUsers(res.data); setLoading(false); })
       .catch(err => { setError(err.message); setLoading(false); });
   }, []);
 
   const handleDelete = (userId) => {
-    axios.delete(`http://localhost:8080/users/${userId}`)
+    axios.delete(`https://online-hotel-booking-system-bf2k.onrender.com/users/${userId}`)
       .then(() => {
         setUsers(users.filter(u => u.id !== userId));
         setDeleteConfirmId(null);

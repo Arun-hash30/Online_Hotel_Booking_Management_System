@@ -87,7 +87,7 @@ const EditHotel = ({ hotelData, onSave, onCancel }) => {
 
       console.log('Sending update payload:', payload);
 
-      const res = await axios.put(`http://localhost:8080/hotels/${formData.id}`, payload, {
+      const res = await axios.put(`https://online-hotel-booking-system-bf2k.onrender.com/hotels/${formData.id}`, payload, {
         headers: { 'Content-Type': 'application/json' },
       });
 

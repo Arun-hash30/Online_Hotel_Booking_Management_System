@@ -145,7 +145,7 @@ function AddHotel() {
         images: formData.images,
       };
 
-      const hotelRes = await axios.post('http://localhost:8080/hotels/create', hotelPayload, {
+      const hotelRes = await axios.post('https://online-hotel-booking-system-bf2k.onrender.com/hotels/create', hotelPayload, {
         headers: { 'Content-Type': 'application/json' },
       });
       const createdHotel = hotelRes.data;
@@ -160,7 +160,7 @@ function AddHotel() {
           pricePerNight: parseFloat(room.pricePerNight) || 0,
           images: room.images,
         };
-        await axios.post('http://localhost:8080/rooms/create', roomPayload, {
+        await axios.post('https://online-hotel-booking-system-bf2k.onrender.com/rooms/create', roomPayload, {
           headers: { 'Content-Type': 'application/json' },
         });
       }

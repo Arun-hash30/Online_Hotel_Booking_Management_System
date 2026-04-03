@@ -9,7 +9,7 @@ function AllBookings() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    axios.get('http://localhost:8080/bookings/getAll')
+    axios.get('https://online-hotel-booking-system-bf2k.onrender.com/bookings/getAll')
       .then(res => { setBookings(res.data); setLoading(false); })
       .catch(err => { console.error('Error fetching bookings:', err); setLoading(false); });
   }, []);

@@ -7,12 +7,12 @@ function AllRooms() {
   const [rowsPerPage, setRowsPerPage] = useState(5); // Default to 5 rows per page
 
   useEffect(() => {
-    fetch('http://localhost:8080/rooms/getAll')
+    fetch('https://online-hotel-booking-system-bf2k.onrender.com/rooms/getAll')
       .then(response => response.json())
       .then(data => setRooms(data))
       .catch(error => console.error('Error fetching rooms:', error));
 
-    fetch('http://localhost:8080/hotels/getAll')
+    fetch('https://online-hotel-booking-system-bf2k.onrender.com/hotels/getAll')
       .then(response => response.json())
       .then(data => setHotels(data))
       .catch(error => console.error('Error fetching hotels:', error));

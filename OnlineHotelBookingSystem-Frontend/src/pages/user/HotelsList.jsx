@@ -21,7 +21,7 @@ const HotelsList = () => {
 
   const fetchHotels = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/hotels/getAll");
+      const response = await axios.get("https://online-hotel-booking-system-bf2k.onrender.com/hotels/getAll");
       setHotels(response.data);
       setLoading(false);
     } catch (error) {

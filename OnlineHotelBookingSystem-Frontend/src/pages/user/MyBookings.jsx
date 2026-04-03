@@ -36,7 +36,7 @@ const MyBookings = () => {
 
     try {
       const bookingsResponse = await axios.get(
-        "http://localhost:8080/bookings/getAll",
+        "https://online-hotel-booking-system-bf2k.onrender.com/bookings/getAll",
         { headers: { Authorization: token ? `Bearer ${token}` : "" } }
       );
 
@@ -44,8 +44,8 @@ const MyBookings = () => {
         (b) => b.userId === parseInt(userId)
       );
 
-      const roomsResponse = await axios.get("http://localhost:8080/rooms/getAll");
-      const hotelsResponse = await axios.get("http://localhost:8080/hotels/getAll");
+      const roomsResponse = await axios.get("https://online-hotel-booking-system-bf2k.onrender.com/rooms/getAll");
+      const hotelsResponse = await axios.get("https://online-hotel-booking-system-bf2k.onrender.com/hotels/getAll");
 
       const enrichedBookings = userBookings.map((booking) => {
         const room = roomsResponse.data.find((r) => r.id === booking.roomId);
@@ -82,7 +82,7 @@ const MyBookings = () => {
 
     try {
       await axios.post(
-        "http://localhost:8080/bookings/request-cancellation",
+        "https://online-hotel-booking-system-bf2k.onrender.com/bookings/request-cancellation",
         { bookingId: selectedBooking.id, reason: cancellationReason },
         { headers: { Authorization: token ? `Bearer ${token}` : "" } }
       );

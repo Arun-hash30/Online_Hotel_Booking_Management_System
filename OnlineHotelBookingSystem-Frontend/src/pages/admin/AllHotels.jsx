@@ -20,7 +20,7 @@ function AllHotels() {
   useEffect(() => { fetchHotels(); }, []);
 
   const fetchHotels = () => {
-    axios.get('http://localhost:8080/hotels/getAll')
+    axios.get('https://online-hotel-booking-system-bf2k.onrender.com/hotels/getAll')
       .then(res => { setHotels(res.data); setLoading(false); })
       .catch(err => { setError(err.message); setLoading(false); });
   };
@@ -40,7 +40,7 @@ function AllHotels() {
   };
 
   const handleDelete = (hotelId) => {
-    axios.delete(`http://localhost:8080/hotels/${hotelId}`)
+    axios.delete(`https://online-hotel-booking-system-bf2k.onrender.com/hotels/${hotelId}`)
       .then(() => {
         setHotels(prev => prev.filter(h => h.id !== hotelId));
         setDeleteConfirmId(null);

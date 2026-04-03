@@ -43,7 +43,7 @@ const HotelManagerDashboard = () => {
     try {
       // Fetch pending cancellations
       const pendingResponse = await axios.get(
-        "http://localhost:8080/bookings/pending-cancellations",
+        "https://online-hotel-booking-system-bf2k.onrender.com/bookings/pending-cancellations",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -54,7 +54,7 @@ const HotelManagerDashboard = () => {
       
       // Fetch all bookings
       const bookingsResponse = await axios.get(
-        "http://localhost:8080/bookings/getAll",
+        "https://online-hotel-booking-system-bf2k.onrender.com/bookings/getAll",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -63,8 +63,8 @@ const HotelManagerDashboard = () => {
       );
       
       // Fetch rooms and hotels for details
-      const roomsResponse = await axios.get("http://localhost:8080/rooms/getAll");
-      const hotelsResponse = await axios.get("http://localhost:8080/hotels/getAll");
+      const roomsResponse = await axios.get("https://online-hotel-booking-system-bf2k.onrender.com/rooms/getAll");
+      const hotelsResponse = await axios.get("https://online-hotel-booking-system-bf2k.onrender.com/hotels/getAll");
       
       const enrichedBookings = bookingsResponse.data.map((booking) => {
         const room = roomsResponse.data.find(r => r.id === booking.roomId);
@@ -95,7 +95,7 @@ const HotelManagerDashboard = () => {
     
     try {
       await axios.post(
-        `http://localhost:8080/bookings/approve-cancellation/${bookingId}`,
+        `https://online-hotel-booking-system-bf2k.onrender.com/bookings/approve-cancellation/${bookingId}`,
         {},
         {
           headers: {
@@ -124,7 +124,7 @@ const HotelManagerDashboard = () => {
     
     try {
       await axios.post(
-        `http://localhost:8080/bookings/reject-cancellation/${bookingId}`,
+        `https://online-hotel-booking-system-bf2k.onrender.com/bookings/reject-cancellation/${bookingId}`,
         {},
         {
           headers: {

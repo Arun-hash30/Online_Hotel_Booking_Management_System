@@ -18,11 +18,11 @@ const AllBookings = () => {
     const token = user?.token || localStorage.getItem("token");
     try {
       const [bookingsRes, roomsRes, hotelsRes] = await Promise.all([
-        axios.get("http://localhost:8080/bookings/getAll", {
+        axios.get("https://online-hotel-booking-system-bf2k.onrender.com/bookings/getAll", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:8080/rooms/getAll"),
-        axios.get("http://localhost:8080/hotels/getAll"),
+        axios.get("https://online-hotel-booking-system-bf2k.onrender.com/rooms/getAll"),
+        axios.get("https://online-hotel-booking-system-bf2k.onrender.com/hotels/getAll"),
       ]);
 
       const enrichedBookings = bookingsRes.data.map((booking) => {

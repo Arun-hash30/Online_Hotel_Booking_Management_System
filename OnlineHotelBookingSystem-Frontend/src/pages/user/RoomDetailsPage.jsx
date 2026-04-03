@@ -14,8 +14,8 @@ const RoomDetailsPage = () => {
   const fetchRoomDetails = async () => {
     try {
       const [roomResponse, hotelsResponse] = await Promise.all([
-        axios.get(`http://localhost:8080/rooms/${roomId}`),
-        axios.get('http://localhost:8080/hotels/getAll')
+        axios.get(`https://online-hotel-booking-system-bf2k.onrender.com/rooms/${roomId}`),
+        axios.get('https://online-hotel-booking-system-bf2k.onrender.com/hotels/getAll')
       ]);
 
       const roomData = roomResponse.data;

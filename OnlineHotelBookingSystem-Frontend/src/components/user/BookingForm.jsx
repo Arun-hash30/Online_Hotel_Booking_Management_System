@@ -45,7 +45,7 @@ const BookingForm = () => {
     try {
       // Create booking
       const bookingResponse = await axios.post(
-        "http://localhost:8080/bookings/create",
+        "https://online-hotel-booking-system-bf2k.onrender.com/bookings/create",
         {
           userId: parseInt(userId, 10),
           roomId: parseInt(roomId, 10),

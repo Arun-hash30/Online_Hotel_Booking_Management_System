@@ -20,7 +20,7 @@ const PendingCancellations = () => {
     const token = user?.token || localStorage.getItem("token");
     try {
       const response = await axios.get(
-        "http://localhost:8080/bookings/pending-cancellations",
+        "https://online-hotel-booking-system-bf2k.onrender.com/bookings/pending-cancellations",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setPendingCancellations(response.data);
@@ -38,7 +38,7 @@ const PendingCancellations = () => {
     const token = user?.token || localStorage.getItem("token");
     try {
       await axios.post(
-        `http://localhost:8080/bookings/approve-cancellation/${bookingId}`,
+        `https://online-hotel-booking-system-bf2k.onrender.com/bookings/approve-cancellation/${bookingId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -57,7 +57,7 @@ const PendingCancellations = () => {
     const token = user?.token || localStorage.getItem("token");
     try {
       await axios.post(
-        `http://localhost:8080/bookings/reject-cancellation/${bookingId}`,
+        `https://online-hotel-booking-system-bf2k.onrender.com/bookings/reject-cancellation/${bookingId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

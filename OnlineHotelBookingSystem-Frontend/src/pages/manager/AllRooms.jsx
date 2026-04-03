@@ -21,20 +21,20 @@ function AllRooms() {
   }, []);
 
   const fetchRooms = () => {
-    axios.get('http://localhost:8080/rooms/getAll')
+    axios.get('https://online-hotel-booking-system-bf2k.onrender.com/rooms/getAll')
       .then(res => setRooms(res.data))
       .catch(() => setError('Failed to fetch rooms'));
   };
 
   const fetchHotels = () => {
-    axios.get('http://localhost:8080/hotels/getAll')
+    axios.get('https://online-hotel-booking-system-bf2k.onrender.com/hotels/getAll')
       .then(res => setHotels(res.data))
       .catch(() => setError('Failed to fetch hotels'));
   };
 
   const handleDeleteRoom = (roomId) => {
     if (!window.confirm('Delete this room?')) return;
-    axios.delete(`http://localhost:8080/rooms/${roomId}`)
+    axios.delete(`https://online-hotel-booking-system-bf2k.onrender.com/rooms/${roomId}`)
       .then(res => {
         if (res.status === 204) {
           toast.success('Room deleted');
@@ -48,7 +48,7 @@ function AllRooms() {
   };
 
   const handleSaveRoom = (updatedRoom) => {
-    axios.put(`http://localhost:8080/rooms/${updatedRoom.id}`, updatedRoom)
+    axios.put(`https://online-hotel-booking-system-bf2k.onrender.com/rooms/${updatedRoom.id}`, updatedRoom)
       .then(res => {
         toast.success('Room updated successfully');
         setRooms(rooms.map(r => r.id === res.data.id ? res.data : r));
@@ -59,7 +59,7 @@ function AllRooms() {
   };
 
   const handleAddRoom = (newRoom) => {
-    axios.post('http://localhost:8080/rooms/create', newRoom)
+    axios.post('https://online-hotel-booking-system-bf2k.onrender.com/rooms/create', newRoom)
       .then(res => {
         toast.success('Room added successfully');
         setRooms([...rooms, res.data]);

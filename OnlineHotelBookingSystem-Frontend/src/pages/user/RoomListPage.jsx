@@ -25,8 +25,8 @@ const RoomListPage = () => {
       const parsedHotelId = parseInt(hotelId, 10);
 
       const [roomsResponse, hotelsResponse] = await Promise.all([
-        axios.get("http://localhost:8080/rooms/getAll"),
-        axios.get("http://localhost:8080/hotels/getAll"),
+        axios.get("https://online-hotel-booking-system-bf2k.onrender.com/rooms/getAll"),
+        axios.get("https://online-hotel-booking-system-bf2k.onrender.com/hotels/getAll"),
       ]);
 
       console.log("All rooms from API:", roomsResponse.data);

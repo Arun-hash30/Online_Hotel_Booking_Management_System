@@ -69,7 +69,7 @@ const Signup = () => {
     setServerError("");
 
     try {
-      const response = await axios.post('http://localhost:8080/users/create', formData, {
+      const response = await axios.post('https://online-hotel-booking-system-bf2k.onrender.com/users/create', formData, {
         headers: {
           'Content-Type': 'application/json',
         },
